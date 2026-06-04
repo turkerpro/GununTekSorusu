@@ -1,0 +1,6 @@
+{
+  "name": "Günün Tek Sorusu",
+  "description": "Her gün herkese aynı, basit bir şükran veya huzur veren mikro farkındalık sorusu soran, 10 saniyede cevaplanabilir minimalist günlük uygulaması.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,6 +1,65 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
+@layer base {
+  /* Default (Dark / theme-dark) relies on default Tailwind colors */
+  
+  .theme-light {
+    --color-neutral-950: #f9fafb;
+    --color-neutral-900: #f3f4f6;
+    --color-neutral-850: #e5e7eb;
+    --color-neutral-800: #d1d5db;
+    --color-neutral-700: #9ca3af;
+    --color-neutral-600: #6b7280;
+    --color-neutral-500: #4b5563;
+    --color-neutral-400: #374151;
+    --color-neutral-300: #1f2937;
+    --color-neutral-200: #111827;
+    --color-neutral-100: #030712;
+    --color-neutral-50: #000000;
+  }
+
+  .theme-ocean {
+    --color-neutral-950: #082f49;
+    --color-neutral-900: #0c4a6e;
+    --color-neutral-850: #0369a1;
+    --color-neutral-800: #0284c7;
+    --color-neutral-700: #0ea5e9;
+    --color-neutral-600: #38bdf8;
+    --color-neutral-500: #7dd3fc;
+    --color-neutral-400: #bae6fd;
+    --color-neutral-300: #e0f2fe;
+    --color-neutral-200: #f0f9ff;
+    --color-neutral-100: #ffffff;
+    
+    /* Change Emerald accent to Cyan/Blue */
+    --color-emerald-400: #22d3ee;
+    --color-emerald-500: #06b6d4;
+  }
+
+  .theme-forest {
+    --color-neutral-950: #052e16;
+    --color-neutral-900: #14532d;
+    --color-neutral-850: #166534;
+    --color-neutral-800: #15803d;
+    --color-neutral-700: #16a34a;
+    --color-neutral-600: #22c55e;
+    --color-neutral-500: #4ade80;
+    --color-neutral-400: #86efac;
+    --color-neutral-300: #bbf7d0;
+    --color-neutral-200: #dcfce7;
+    --color-neutral-100: #f0fdf4;
+    
+    /* Change Emerald to a warmer lime or different green */
+    --color-emerald-400: #a3e635;
+    --color-emerald-500: #84cc16;
+  }
+
+  body {
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+}
+
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;

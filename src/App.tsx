@@ -25,8 +25,15 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { DailyLog, UserProfile, GlobalFeedItem, AIAnalysisResult } from "./types";
+import { useAuth } from "./AuthContext";
+import { useTheme } from "./ThemeContext";
+import { LogIn, LogOut, Palette } from "lucide-react";
 
 export default function App() {
+  const { user, loginAnonymous, loginWithGoogle, logout, isPremium, togglePremium } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   // --- STATE ---
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem("gts_profile");
@@ -354,10 +361,10 @@ export default function App() {
 
   // Toggle pricing / support premium simulation
   const handleUnlockPremium = () => {
-    setProfile(prev => ({ ...prev, isPremium: !prev.isPremium }));
+    togglePremium();
     showToast(
-      !profile.isPremium 
-        ? "Deneyiminiz başarıyla Premium'a yükseltildi! Tüm soru paketleri ve analizler açıldı." 
+      !isPremium 
+        ? "Deneyiminiz başarıyla Premium'a yükseltildi! Tüm soru paketleri ve temalar açıldı." 
         : "Premium üyeliğiniz sonlandırıldı. Reklamsız minimalist sürüme dönüldü.", 
       "success"
     );
@@ -490,17 +497,42 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Auth State */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-neutral-400 hidden md:inline-block truncate max-w-[100px]">
+                  {user.displayName || "Anonim"}
+                </span>
+                <button onClick={logout} className="p-1.5 bg-neutral-900 border border-neutral-800 rounded-lg text-neutral-500 hover:text-red-400 transition-colors" title="Çıkış Yap">
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setIsLoginModalOpen(true)}
+                className="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all font-semibold"
+              >
+                <LogIn className="w-3.5 h-3.5" /> Giriş
+              </button>
+            )}
+
             {/* Streak display */}
             <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-lg text-sm select-none" title="Mevcut Günlük Cevaplama Serisi">
               <Flame className={`w-4 h-4 ${profile.streak > 0 ? "text-amber-500 fill-amber-500 animate-pulse" : "text-neutral-500"}`} />
               <span className="font-mono font-bold">{profile.streak} gün</span>
             </div>
 
-            {/* Free Tier Badge */}
-            <div className="text-xs px-3 py-1.5 rounded-lg border bg-emerald-950/40 text-emerald-300 border-emerald-500/20 flex items-center gap-1.5 select-none font-bold">
-              <Sparkles className="w-3.5 h-3.5 fill-emerald-300/20 text-emerald-300" />
-              Sınırsız Free Tier
-            </div>
+            {/* Premium Badge */}
+            {isPremium ? (
+              <div className="text-[10px] uppercase tracking-widest px-2 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1 select-none font-bold">
+                PRO
+              </div>
+            ) : (
+              <div className="text-xs px-3 py-1.5 rounded-lg border bg-emerald-950/40 text-emerald-300 border-emerald-500/20 flex items-center gap-1.5 select-none font-bold">
+                <Sparkles className="w-3.5 h-3.5 fill-emerald-300/20 text-emerald-300" />
+                Free
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -1219,17 +1251,52 @@ export default function App() {
             <div className="bg-gradient-to-br from-emerald-950/20 via-neutral-900 to-neutral-900 border border-emerald-500/20 p-6 md:p-8 rounded-2xl relative overflow-hidden shadow-xl">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
               
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono uppercase tracking-widest font-bold">
-                100% Ücretsiz & Sınırsız Sürüm
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono uppercase tracking-widest font-bold">
+                  {isPremium ? "Premium Sürüm Aktif" : "Sınırsız Sürüm"}
+                </span>
+                <button 
+                  onClick={handleUnlockPremium}
+                  className="text-[10px] underline text-neutral-500 hover:text-emerald-400"
+                >
+                  {isPremium ? "Aboneliği İptal Et (Test)" : "Pro'ya Yükselt (Test)"}
+                </button>
+              </div>
 
               <h3 className="text-xl md:text-2xl font-serif font-bold text-neutral-100 mt-3 mb-2">
-                Sıkıntısız ve Engelsiz Farkındalık Özellikleri
+                {isPremium ? "Premium Özelliklere Hoş Geldin" : "Sıkıntısız ve Engelsiz Farkındalık Özellikleri"}
               </h3>
               
               <p className="text-neutral-400 text-sm max-w-xl leading-relaxed">
-                Herkesin zihinsel bütünlüğe, içsel huzura ve şükran dolu bir yaşama engelsiz erişim hakkı olduğuna inanıyoruz. Tüm gelişmiş defter döküm araçları, aile modülleri ve tematik farkındalık konuları ömür boyu tamamen ücretsizdir.
+                {isPremium ? "Sınırsız AI analizi, özel temalar ve daha fazlası seninle. Kendini keşfetme yolculuğunda sınırları kaldırdın." : "Tüm temel defter döküm araçları ömür boyu tamamen ücretsizdir. Premium sürüm ile özel temalar ve sınırsız analize erişebilirsin."}
               </p>
+            </div>
+
+            {/* THEME SWITCHER */}
+            <div className="bg-neutral-900 border border-neutral-800 p-5 rounded-xl flex flex-col justify-between relative overflow-hidden">
+              <div className="space-y-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-semibold">Tema Özelleştirme</h4>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Zihnini yansıtan renk paletini seç.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={() => setTheme('dark')} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${theme === 'dark' ? 'border-neutral-500 bg-neutral-800' : 'border-neutral-800 bg-neutral-950 text-neutral-400'}`}>
+                  <span className="w-3 h-3 rounded-full bg-neutral-950 border border-neutral-700"></span> Gece
+                </button>
+                <button onClick={() => setTheme('light')} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${theme === 'light' ? 'border-neutral-400 bg-neutral-100 text-neutral-900' : 'border-neutral-800 bg-neutral-950 text-neutral-400'}`}>
+                  <span className="w-3 h-3 rounded-full bg-white border border-neutral-300"></span> Aydınlık
+                </button>
+                <button onClick={() => { if(isPremium) setTheme('ocean'); else showToast("Bu tema Premium kullanıcılara özeldir.", "info"); }} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${theme === 'ocean' ? 'border-sky-500 bg-sky-900/30 text-sky-300' : 'border-neutral-800 bg-neutral-950 text-neutral-400'}`}>
+                  <span className="w-3 h-3 rounded-full bg-sky-500"></span> Okyanus {isPremium ? '' : '🔒'}
+                </button>
+                <button onClick={() => { if(isPremium) setTheme('forest'); else showToast("Bu tema Premium kullanıcılara özeldir.", "info"); }} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${theme === 'forest' ? 'border-green-500 bg-green-900/30 text-green-300' : 'border-neutral-800 bg-neutral-950 text-neutral-400'}`}>
+                  <span className="w-3 h-3 rounded-full bg-green-500"></span> Doğa {isPremium ? '' : '🔒'}
+                </button>
+              </div>
             </div>
 
             {/* PRIVILEGES LIST (BENTO BOX OR MINI GRID) */}
@@ -1340,6 +1407,63 @@ export default function App() {
 
           </div>
         )}
+
+        {/* LOGIN MODAL */}
+        <AnimatePresence>
+          {isLoginModalOpen && (
+            <div className="fixed inset-0 bg-neutral-950/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+              <motion.div 
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                className="bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-sm w-full shadow-2xl relative"
+              >
+                <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-300">
+                  <X className="w-5 h-5" />
+                </button>
+                
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6 border border-emerald-500/20">
+                  <User className="w-6 h-6 text-emerald-400" />
+                </div>
+
+                <h2 className="text-xl font-serif font-bold text-neutral-100 mb-2">Giriş Yap</h2>
+                <p className="text-neutral-400 text-sm mb-6 leading-relaxed">
+                  Hesap oluşturarak farklı cihazlardan günlüklerine erişebilir ve verilerini güvenle saklayabilirsin.
+                </p>
+
+                <div className="space-y-3">
+                  <button 
+                    onClick={async () => {
+                      await loginWithGoogle();
+                      setIsLoginModalOpen(false);
+                      showToast("Başarıyla giriş yapıldı.", "success");
+                    }}
+                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-neutral-100 text-neutral-900 font-medium py-3 rounded-xl transition-all"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google ile Devam Et
+                  </button>
+                  
+                  <button 
+                    onClick={async () => {
+                      await loginAnonymous();
+                      setIsLoginModalOpen(false);
+                      showToast("Anonim olarak giriş yapıldı.", "success");
+                    }}
+                    className="w-full bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium py-3 rounded-xl transition-all text-sm border border-neutral-700"
+                  >
+                    Anonim Devam Et (Misafir)
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
       </main>
 
